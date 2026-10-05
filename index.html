@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGNALINK MVP-1.5 — Temporal Logic</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="brand">
+      <div class="brand-mark">S</div>
+      <div>
+        <h1>SIGNALINK</h1>
+        <p>Sense. Process. Communicate. Assist.</p>
+      </div>
+      <span class="mvp-tag">MVP-1.5</span>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">TEMPORAL LOGIC EXPERIMENT</p>
+      <h2>Teach SIGNALINK to remember.</h2>
+      <p>Send controlled gesture events into a small time-series buffer and observe the sequence it builds.</p>
+    </section>
+
+    <section class="controls">
+      <button data-gesture="HELLO">✋ HELLO</button>
+      <button data-gesture="STOP">✊ STOP</button>
+      <button data-gesture="YES">👍 YES</button>
+      <button id="clearButton" class="secondary">CLEAR</button>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">TEMPORAL BUFFER</p>
+      <div id="buffer" class="buffer" aria-live="polite">
+        <span class="empty">[ empty ]</span>
+      </div>
+    </section>
+
+    <section class="panel output-card">
+      <p class="eyebrow">SEQUENCE</p>
+      <div id="sequence" class="sequence" aria-live="polite">Waiting for gesture events…</div>
+      <p id="eventCount" class="meta">0 events</p>
+    </section>
+
+    <footer>
+      <span>SIGNALINK MVP-1.5</span>
+      <span>Temporal logic · No camera · No ML</span>
+    </footer>
+  </main>
+  <script src="script.js" defer></script>
+</body>
+</html>
