@@ -1,5 +1,6 @@
 const MAX_BUFFER_SIZE = 3;
 const gestureBuffer = [];
+let lastGesture = null;
 
 const bufferEl = document.getElementById("buffer");
 const sequenceEl = document.getElementById("sequence");
@@ -7,6 +8,12 @@ const eventCountEl = document.getElementById("eventCount");
 const clearButton = document.getElementById("clearButton");
 
 function addGesture(gesture) {
+  // Treat repeated observations of the same held gesture as one event.
+  if (gesture === lastGesture) {
+    return;
+  }
+
+  lastGesture = gesture;
   gestureBuffer.push(gesture);
 
   if (gestureBuffer.length > MAX_BUFFER_SIZE) {
@@ -18,6 +25,7 @@ function addGesture(gesture) {
 
 function clearBuffer() {
   gestureBuffer.length = 0;
+  lastGesture = null;
   render();
 }
 
