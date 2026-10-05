@@ -171,6 +171,8 @@ function speakCurrentMessage() {
     utterance.voice = englishVoice;
   }
 
+  // Clear any stale browser speech queue before starting a fresh utterance.
+  synth.cancel();
   speechState = "speaking";
   speakButton.textContent = "🔊 SPEAKING…";
   speechStatusEl.textContent = "Starting speech…";
