@@ -85,11 +85,16 @@ function speakCurrentMessage() {
     return;
   }
 
-  const text = getCommunicationOutput(gestureBuffer);
   const synth = window.speechSynthesis;
 
-  synth.cancel();
+  if (synth.speaking) {
+    synth.cancel();
+    speakButton.textContent = "🔊 SPEAK";
+    speechStatusEl.textContent = "Speech stopped.";
+    return;
+  }
 
+  const text = getCommunicationOutput(gestureBuffer);
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "en-US";
   utterance.rate = 0.95;
