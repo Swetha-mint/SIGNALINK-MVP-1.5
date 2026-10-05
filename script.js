@@ -7,6 +7,9 @@ const sequenceEl = document.getElementById("sequence");
 const eventCountEl = document.getElementById("eventCount");
 const clearButton = document.getElementById("clearButton");
 const speakButton = document.getElementById("speakButton");
+const pauseButton = document.getElementById("pauseButton");
+const resumeButton = document.getElementById("resumeButton");
+const stopButton = document.getElementById("stopButton");
 const speechStatusEl = document.getElementById("speechStatus");
 
 function getCommunicationOutput(sequence) {
@@ -74,6 +77,23 @@ function render() {
     `${gestureBuffer.length} event${gestureBuffer.length === 1 ? "" : "s"} in buffer`;
 }
 
+function updateSpeechControls() {
+  const synth = window.speechSynthesis;
+
+  if (!synth || !synth.speaking) {
+    speakButton.disabled = false;
+    pauseButton.disabled = true;
+    resumeButton.disabled = true;
+    stopButton.disabled = true;
+    return;
+  }
+
+  speakButton.disabled = true;
+  pauseButton.disabled = !synth.speaking || synth.paused;
+  resumeButton.disabled = !synth.paused;
+  stopButton.disabled = false;
+}
+
 function speakCurrentMessage() {
   if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
     speechStatusEl.textContent = "Speech synthesis is not supported in this browser.";
@@ -88,9 +108,9 @@ function speakCurrentMessage() {
   const synth = window.speechSynthesis;
 
   if (synth.speaking) {
-    synth.cancel();
-    speakButton.textContent = "🔊 SPEAK";
-    speechStatusEl.textContent = "Speech stopped.";
+    speechStatusEl.textContent = synth.paused
+      ? "Speech is paused. Use RESUME."
+      : "Speech is already running. Use PAUSE or STOP.";
     return;
   }
 
@@ -104,11 +124,13 @@ function speakCurrentMessage() {
   utterance.onstart = () => {
     speakButton.textContent = "🔊 SPEAKING…";
     speechStatusEl.textContent = "Speech started.";
+    updateSpeechControls();
   };
 
   utterance.onend = () => {
     speakButton.textContent = "🔊 SPEAK";
     speechStatusEl.textContent = "Speech finished.";
+    updateSpeechControls();
   };
 
   utterance.onerror = event => {
@@ -116,10 +138,12 @@ function speakCurrentMessage() {
 
     if (event.error === "interrupted" || event.error === "canceled") {
       speechStatusEl.textContent = "Speech stopped.";
+      updateSpeechControls();
       return;
     }
 
     speechStatusEl.textContent = `Speech error: ${event.error || "unknown error"}`;
+    updateSpeechControls();
   };
 
   const voices = synth.getVoices();
@@ -133,6 +157,7 @@ function speakCurrentMessage() {
 
   speechStatusEl.textContent = "Starting speech…";
   synth.speak(utterance);
+  updateSpeechControls();
 
   window.setTimeout(() => {
     if (synth.paused) {
@@ -150,4 +175,36 @@ document.querySelectorAll("[data-gesture]").forEach(button => {
 clearButton.addEventListener("click", clearBuffer);
 speakButton.addEventListener("click", speakCurrentMessage);
 
+pauseButton.addEventListener("click", () => {
+  const synth = window.speechSynthesis;
+
+  if (synth.speaking && !synth.paused) {
+    synth.pause();
+    speechStatusEl.textContent = "Speech paused.";
+    updateSpeechControls();
+  }
+});
+
+resumeButton.addEventListener("click", () => {
+  const synth = window.speechSynthesis;
+
+  if (synth.paused) {
+    synth.resume();
+    speechStatusEl.textContent = "Speech resumed.";
+    updateSpeechControls();
+  }
+});
+
+stopButton.addEventListener("click", () => {
+  const synth = window.speechSynthesis;
+
+  if (synth.speaking || synth.paused) {
+    synth.cancel();
+    speakButton.textContent = "🔊 SPEAK";
+    speechStatusEl.textContent = "Speech stopped.";
+    updateSpeechControls();
+  }
+});
+
 render();
+updateSpeechControls();
