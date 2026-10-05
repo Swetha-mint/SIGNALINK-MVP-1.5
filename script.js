@@ -7,6 +7,7 @@ const sequenceEl = document.getElementById("sequence");
 const eventCountEl = document.getElementById("eventCount");
 const clearButton = document.getElementById("clearButton");
 const speakButton = document.getElementById("speakButton");
+const speechStatusEl = document.getElementById("speechStatus");
 
 function getCommunicationOutput(sequence) {
   const key = sequence.join("→");
@@ -74,13 +75,13 @@ function render() {
 }
 
 function speakCurrentMessage() {
-  if (!("speechSynthesis" in window)) {
-    sequenceEl.textContent = "Speech synthesis is not supported in this browser.";
+  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+    speechStatusEl.textContent = "Speech synthesis is not supported in this browser.";
     return;
   }
 
   if (gestureBuffer.length === 0) {
-    sequenceEl.textContent = "Add a gesture before speaking.";
+    speechStatusEl.textContent = "Add a gesture before speaking.";
     return;
   }
 
@@ -97,28 +98,31 @@ function speakCurrentMessage() {
 
   utterance.onstart = () => {
     speakButton.textContent = "🔊 SPEAKING…";
+    speechStatusEl.textContent = "Speech started.";
   };
 
   utterance.onend = () => {
     speakButton.textContent = "🔊 SPEAK";
+    speechStatusEl.textContent = "Speech finished.";
   };
 
   utterance.onerror = event => {
     speakButton.textContent = "🔊 SPEAK";
-    sequenceEl.textContent = `Speech error: ${event.error || "unknown error"}`;
+    speechStatusEl.textContent = `Speech error: ${event.error || "unknown error"}`;
   };
 
-  // Some browsers populate their voice list asynchronously.
   const voices = synth.getVoices();
-  const englishVoice = voices.find(voice => voice.lang?.toLowerCase().startsWith("en"));
+  const englishVoice = voices.find(voice =>
+    voice.lang && voice.lang.toLowerCase().startsWith("en")
+  );
 
   if (englishVoice) {
     utterance.voice = englishVoice;
   }
 
+  speechStatusEl.textContent = "Starting speech…";
   synth.speak(utterance);
 
-  // Work around a known browser speech-synthesis pause issue.
   window.setTimeout(() => {
     if (synth.paused) {
       synth.resume();
