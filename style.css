@@ -154,3 +154,36 @@ footer {
   border-top: 2px solid var(--black);
   font-size: 13px;
 }
+
+/* Speech control group */
+.speech-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.speech-controls button {
+  min-width: 120px;
+}
+
+.speech-controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.speech-controls .speak-button {
+  background: var(--orange);
+}
+
+@media (max-width: 600px) {
+  .speech-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .speech-controls button {
+    width: 100%;
+  }
+}
