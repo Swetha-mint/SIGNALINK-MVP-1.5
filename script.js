@@ -32,7 +32,6 @@ function getCommunicationOutput(sequence) {
 }
 
 function addGesture(gesture) {
-  // Treat repeated observations of the same held gesture as one event.
   if (gesture === lastGesture) {
     return;
   }
@@ -74,6 +73,59 @@ function render() {
     `${gestureBuffer.length} event${gestureBuffer.length === 1 ? "" : "s"} in buffer`;
 }
 
+function speakCurrentMessage() {
+  if (!("speechSynthesis" in window)) {
+    sequenceEl.textContent = "Speech synthesis is not supported in this browser.";
+    return;
+  }
+
+  if (gestureBuffer.length === 0) {
+    sequenceEl.textContent = "Add a gesture before speaking.";
+    return;
+  }
+
+  const text = getCommunicationOutput(gestureBuffer);
+  const synth = window.speechSynthesis;
+
+  synth.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.95;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  utterance.onstart = () => {
+    speakButton.textContent = "🔊 SPEAKING…";
+  };
+
+  utterance.onend = () => {
+    speakButton.textContent = "🔊 SPEAK";
+  };
+
+  utterance.onerror = event => {
+    speakButton.textContent = "🔊 SPEAK";
+    sequenceEl.textContent = `Speech error: ${event.error || "unknown error"}`;
+  };
+
+  // Some browsers populate their voice list asynchronously.
+  const voices = synth.getVoices();
+  const englishVoice = voices.find(voice => voice.lang?.toLowerCase().startsWith("en"));
+
+  if (englishVoice) {
+    utterance.voice = englishVoice;
+  }
+
+  synth.speak(utterance);
+
+  // Work around a known browser speech-synthesis pause issue.
+  window.setTimeout(() => {
+    if (synth.paused) {
+      synth.resume();
+    }
+  }, 100);
+}
+
 document.querySelectorAll("[data-gesture]").forEach(button => {
   button.addEventListener("click", () => {
     addGesture(button.dataset.gesture);
@@ -81,27 +133,6 @@ document.querySelectorAll("[data-gesture]").forEach(button => {
 });
 
 clearButton.addEventListener("click", clearBuffer);
-
-speakButton.addEventListener("click", () => {
-  const text = getCommunicationOutput(gestureBuffer);
-
-  if (!("speechSynthesis" in window)) {
-    sequenceEl.textContent = "Speech synthesis is not supported in this browser.";
-    return;
-  }
-
-  if (gestureBuffer.length === 0) {
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.95;
-  utterance.pitch = 1;
-
-  window.speechSynthesis.speak(utterance);
-});
+speakButton.addEventListener("click", speakCurrentMessage);
 
 render();
