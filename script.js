@@ -108,6 +108,12 @@ function speakCurrentMessage() {
 
   utterance.onerror = event => {
     speakButton.textContent = "🔊 SPEAK";
+
+    if (event.error === "interrupted" || event.error === "canceled") {
+      speechStatusEl.textContent = "Speech stopped.";
+      return;
+    }
+
     speechStatusEl.textContent = `Speech error: ${event.error || "unknown error"}`;
   };
 
