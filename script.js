@@ -6,6 +6,7 @@ const bufferEl = document.getElementById("buffer");
 const sequenceEl = document.getElementById("sequence");
 const eventCountEl = document.getElementById("eventCount");
 const clearButton = document.getElementById("clearButton");
+const speakButton = document.getElementById("speakButton");
 
 function getCommunicationOutput(sequence) {
   const key = sequence.join("→");
@@ -80,5 +81,27 @@ document.querySelectorAll("[data-gesture]").forEach(button => {
 });
 
 clearButton.addEventListener("click", clearBuffer);
+
+speakButton.addEventListener("click", () => {
+  const text = getCommunicationOutput(gestureBuffer);
+
+  if (!("speechSynthesis" in window)) {
+    sequenceEl.textContent = "Speech synthesis is not supported in this browser.";
+    return;
+  }
+
+  if (gestureBuffer.length === 0) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.95;
+  utterance.pitch = 1;
+
+  window.speechSynthesis.speak(utterance);
+});
 
 render();
