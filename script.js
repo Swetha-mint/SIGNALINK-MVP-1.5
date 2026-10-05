@@ -7,6 +7,29 @@ const sequenceEl = document.getElementById("sequence");
 const eventCountEl = document.getElementById("eventCount");
 const clearButton = document.getElementById("clearButton");
 
+function getCommunicationOutput(sequence) {
+  const key = sequence.join("→");
+
+  const phrases = {
+    "HELLO": "Hello.",
+    "YES": "Yes.",
+    "STOP": "Please stop.",
+    "YES→HELLO": "Hello, yes.",
+    "HELLO→STOP": "Hello, please stop.",
+    "YES→YES": "Yes, yes.",
+    "YES→YES→YES": "Yes, yes, yes.",
+    "HELLO→YES": "Hello, yes.",
+    "STOP→YES": "Please stop. Yes."
+  };
+
+  return phrases[key] || sequence.map(gesture => {
+    if (gesture === "HELLO") return "Hello.";
+    if (gesture === "STOP") return "Please stop.";
+    if (gesture === "YES") return "Yes.";
+    return gesture;
+  }).join(" ");
+}
+
 function addGesture(gesture) {
   // Treat repeated observations of the same held gesture as one event.
   if (gesture === lastGesture) {
@@ -43,7 +66,7 @@ function render() {
       bufferEl.appendChild(token);
     }
 
-    sequenceEl.textContent = gestureBuffer.join(" → ");
+    sequenceEl.textContent = getCommunicationOutput(gestureBuffer);
   }
 
   eventCountEl.textContent =
