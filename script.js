@@ -179,3 +179,49 @@ function speakCurrentMessage() {
 }
 
 ;
+
+document.querySelectorAll("[data-gesture]").forEach(button => {
+  button.addEventListener("click", () => {
+    addGesture(button.dataset.gesture);
+  });
+});
+
+clearButton.addEventListener("click", clearBuffer);
+speakButton.addEventListener("click", speakCurrentMessage);
+
+pauseButton.addEventListener("click", () => {
+  const synth = window.speechSynthesis;
+
+  if (speechState === "speaking" && synth.speaking) {
+    speechState = "paused";
+    synth.pause();
+    speechStatusEl.textContent = "Speech paused.";
+    updateSpeechControls();
+  }
+});
+
+resumeButton.addEventListener("click", () => {
+  const synth = window.speechSynthesis;
+
+  if (speechState === "paused" && synth.speaking) {
+    speechState = "speaking";
+    synth.resume();
+    speechStatusEl.textContent = "Speech resumed.";
+    updateSpeechControls();
+  }
+});
+
+stopButton.addEventListener("click", () => {
+  const synth = window.speechSynthesis;
+
+  if (speechState === "speaking" || speechState === "paused") {
+    speechState = "idle";
+    synth.cancel();
+    speakButton.textContent = "🔊 SPEAK";
+    speechStatusEl.textContent = "Speech stopped.";
+    updateSpeechControls();
+  }
+});
+
+render();
+updateSpeechControls();
